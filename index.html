@@ -30,21 +30,51 @@
                 <span style="font-size: 1.8rem; margin-right: 0.25rem;">💰</span> Dépenses Bénin
             </div>
             <h1>Bienvenue</h1>
-            <p class="auth-subtitle">Gérez vos finances avec élégance.</p>
+            <p class="auth-subtitle" id="authSubtitle">Gérez vos finances avec élégance.</p>
             
-            <div class="form-group">
-                <label for="email">Adresse Émail</label>
-                <input type="email" id="email" placeholder="nom@exemple.com">
+            <!-- Login Form -->
+            <div id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Adresse Émail</label>
+                    <input type="email" id="loginEmail" placeholder="nom@exemple.com">
+                </div>
+                
+                <div class="form-group" style="margin-bottom: 2rem;">
+                    <label for="loginPassword">Mot de passe</label>
+                    <input type="password" id="loginPassword" placeholder="••••••••">
+                </div>
+                
+                <div class="btn-container" style="margin-bottom: 1rem;">
+                    <button onclick="login()" class="btn w-100">Se connecter</button>
+                </div>
+                <div class="auth-links" style="margin-top: 0.5rem; text-align: center;">
+                    Vous n'avez pas de compte ? <a href="#" onclick="toggleAuthMode('signup')">S'inscrire</a>
+                </div>
             </div>
-            
-            <div class="form-group" style="margin-bottom: 2rem;">
-                <label for="password">Mot de passe</label>
-                <input type="password" id="password" placeholder="••••••••">
-            </div>
-            
-            <div class="btn-container">
-                <button onclick="login()" class="btn w-100">Se connecter</button>
-                <button onclick="createAccount()" class="btn secondary w-100" style="margin-top: -0.5rem;">Créer un compte</button>
+
+            <!-- Signup Form (Hidden by default) -->
+            <div id="signupForm" style="display: none;">
+                <div class="form-group">
+                    <label for="signupName">Nom Complet</label>
+                    <input type="text" id="signupName" placeholder="Ex: Jean Dupont">
+                </div>
+                
+                <div class="form-group">
+                    <label for="signupEmail">Adresse Émail</label>
+                    <input type="email" id="signupEmail" placeholder="nom@exemple.com">
+                </div>
+                
+                <div class="form-group" style="margin-bottom: 2rem;">
+                    <label for="signupPassword">Mot de passe</label>
+                    <input type="password" id="signupPassword" placeholder="•••••••• (Min 6)">
+                </div>
+                
+                <div class="btn-container" style="margin-bottom: 1rem;">
+                    <button onclick="createAccount()" class="btn w-100">Créer le compte</button>
+                </div>
+                <div class="auth-links" style="margin-top: 0.5rem; text-align: center;">
+                    Déjà un compte ? <a href="#" onclick="toggleAuthMode('login')">Se connecter</a>
+                </div>
             </div>
         </div>
     </div>
