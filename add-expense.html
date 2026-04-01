@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.exchangerate-api.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com wss://*.firebaseio.com; img-src 'self' data:;">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dépenses Bénin | Ajouter</title>
+    <!-- Firebase scripts -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <!-- Firebase config -->
+    <script>
+        const firebaseConfig = {
+           apiKey: "AIzaSyAMmyv39XdlFE8DsJ5U8IhpavF5b6JFfVo",
+           authDomain: "benin-expense-tracker.firebaseapp.com",
+           projectId: "benin-expense-tracker",
+           storageBucket: "benin-expense-tracker.firebasestorage.app",
+           messagingSenderId: "138303766823",
+           appId: "1:138303766823:web:4e72e0df2e94dce5abe902"
+        };
+        firebase.initializeApp(firebaseConfig);
+    </script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-logo">
+            <span>💰</span> Dépenses Bénin
+        </div>
+        <div class="nav-links">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="add-expense.html" class="active">Ajouter</a>
+            <a href="#" onclick="logout()" style="color: var(--danger);">Déconnexion</a>
+        </div>
+    </nav>
+
+    <div class="container" style="max-width: 600px; padding-top: 4rem;">
+        <div class="card" style="padding: 2.5rem;">
+            <h1 style="text-align: left; margin-bottom: 0.5rem;">➕ Ajouter une dépense</h1>
+            <p class="auth-subtitle" style="text-align: left; margin-bottom: 2rem;">Saisissez les détails de la transaction ci-dessous.</p>
+            
+            <form id="expenseForm">
+                <div class="form-group">
+                    <label for="category">Catégorie</label>
+                    <select id="category" required>
+                        <option value="">-- Sélectionnez une catégorie --</option>
+                        <option value="Nourriture">🍔 Nourriture</option>
+                        <option value="Transport (Zemidjan)">🏍️ Transport (Zemidjan)</option>
+                        <option value="Communication (Airtime)">📱 Communication (Airtime)</option>
+                        <option value="Énergie (SBEE)">⚡ Énergie (SBEE)</option>
+                        <option value="Santé">💊 Santé</option>
+                        <option value="Logement">🏠 Logement</option>
+                        <option value="Éducation">📚 Éducation</option>
+                        <option value="Divertissement">🎮 Divertissement</option>
+                        <option value="Autre">🏷️ Autre</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="amount">Montant (XOF)</label>
+                    <input type="number" id="amount" min="0" step="1" required placeholder="Ex: 5000">
+                </div>
+
+                <div class="form-group">
+                    <label for="date">Date</label>
+                    <input type="date" id="date" required>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 2rem;">
+                    <label for="description">Note ou Description</label>
+                    <textarea id="description" rows="3" placeholder="Description de la dépense..."></textarea>
+                </div>
+
+                <div class="btn-container">
+                    <button type="submit" class="btn">Enregistrer la dépense</button>
+                    <a href="dashboard.html" class="btn secondary">Annuler</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function logout() {
+            firebase.auth().signOut().then(() => {
+                window.location.href = 'index.html';
+            });
+        }
+
+        firebase.auth().onAuthStateChanged(function(user) {
+            if (!user) { window.location.href = 'index.html'; }
+        });
+
+        document.getElementById('expenseForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const user = firebase.auth().currentUser;
+            if (!user) { alert('Vous devez être connecté'); return; }
+
+            const category = document.getElementById('category').value;
+            const amount = Number(document.getElementById('amount').value);
+            const date = document.getElementById('date').value;
+            const description = document.getElementById('description').value;
+
+            firebase.firestore().collection('expenses').add({
+                userId: user.uid,
+                category: category,
+                amount: amount,
+                date: date,
+                description: description,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                window.location.href = 'dashboard.html';
+            }).catch((error) => alert('Erreur : ' + error.message));
+        });
+    </script>
+</body>
+</html>

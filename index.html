@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.exchangerate-api.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com wss://*.firebaseio.com; img-src 'self' data:;">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dépenses Bénin | Connexion</title>
+    <!-- Firebase scripts -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script>
+        const firebaseConfig = {
+           apiKey: "AIzaSyAMmyv39XdlFE8DsJ5U8IhpavF5b6JFfVo",
+           authDomain: "benin-expense-tracker.firebaseapp.com",
+           projectId: "benin-expense-tracker",
+           storageBucket: "benin-expense-tracker.firebasestorage.app",
+           messagingSenderId: "138303766823",
+           appId: "1:138303766823:web:4e72e0df2e94dce5abe902"
+        };
+        firebase.initializeApp(firebaseConfig);
+    </script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="card auth-card">
+            <div class="nav-logo" style="justify-content: center; margin-bottom: 1rem; font-size: 1.5rem;">
+                <span style="font-size: 1.8rem; margin-right: 0.25rem;">💰</span> Dépenses Bénin
+            </div>
+            <h1>Bienvenue</h1>
+            <p class="auth-subtitle">Gérez vos finances avec élégance.</p>
+            
+            <div class="form-group">
+                <label for="email">Adresse Émail</label>
+                <input type="email" id="email" placeholder="nom@exemple.com">
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 2rem;">
+                <label for="password">Mot de passe</label>
+                <input type="password" id="password" placeholder="••••••••">
+            </div>
+            
+            <div class="btn-container">
+                <button onclick="login()" class="btn w-100">Se connecter</button>
+                <button onclick="createAccount()" class="btn secondary w-100" style="margin-top: -0.5rem;">Créer un compte</button>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

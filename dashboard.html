@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.exchangerate-api.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com wss://*.firebaseio.com; img-src 'self' data:;">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dépenses Bénin | Dashboard</title>
+    <!-- Firebase scripts -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <!-- Chart.js for graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const firebaseConfig = {
+           apiKey: "AIzaSyAMmyv39XdlFE8DsJ5U8IhpavF5b6JFfVo",
+           authDomain: "benin-expense-tracker.firebaseapp.com",
+           projectId: "benin-expense-tracker",
+           storageBucket: "benin-expense-tracker.firebasestorage.app",
+           messagingSenderId: "138303766823",
+           appId: "1:138303766823:web:4e72e0df2e94dce5abe902"
+        };
+        firebase.initializeApp(firebaseConfig);
+    </script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-logo">
+            <span>💰</span> Dépenses Bénin
+        </div>
+        <div class="nav-links">
+            <a href="dashboard.html" class="active">Dashboard</a>
+            <a href="add-expense.html">Ajouter</a>
+            <a href="#" onclick="logout()" style="color: var(--danger);">Déconnexion</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Action Buttons -->
+        <div class="btn-container header-actions">
+            <h1>Tableau de bord</h1>
+            <div class="header-buttons">
+                <button class="btn secondary" onclick="syncMobileMoney()">📱 Sync MTN MoMo</button>
+                <a href="add-expense.html" class="btn">➕ Dépense</a>
+            </div>
+        </div>
+        <div id="syncStatus" class="mt-20"></div>
+
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+            
+            <!-- Budget Card -->
+            <div class="card budget-card">
+                <h3>💰 Budget Mensuel</h3>
+                <div id="budgetDisplay">
+                    <div class="budget-insight">
+                        <div class="budget-amount"><span id="budgetAmount">--</span> <span>XOF</span></div>
+                        <div class="budget-spent">Dépensé: <strong><span id="monthlySpent">--</span> XOF</strong></div>
+                    </div>
+                    
+                    <div class="progress-container">
+                        <div id="budgetProgress" class="progress-bar" style="width: 0%;"></div>
+                    </div>
+                    <p id="budgetAlert" class="alert" style="display: none; margin-bottom: 0;"></p>
+                </div>
+                <div id="budgetForm" class="budget-form">
+                    <input type="number" id="newBudget" placeholder="Nouveau budget (XOF)" style="flex: 1;">
+                    <button onclick="setBudget()" class="btn">Définir</button>
+                </div>
+            </div>
+
+            <!-- Exchange Rates Card -->
+            <div class="card exchange-card">
+                <h3>💱 Taux de change</h3>
+                <div class="exchange-grid">
+                    <div class="exchange-item">
+                        <strong>🇺🇸 USD</strong>
+                        <span id="usdRate" class="exchange-rate">...</span>
+                    </div>
+                    <div class="exchange-item">
+                        <strong>🇪🇺 EUR</strong>
+                        <span id="eurRate" class="exchange-rate">...</span>
+                    </div>
+                    <div class="exchange-item">
+                        <strong>🇬🇧 GBP</strong>
+                        <span id="gbpRate" class="exchange-rate">...</span>
+                    </div>
+                    <div class="exchange-item">
+                        <strong>🇳🇬 NGN</strong>
+                        <span id="ngnRate" class="exchange-rate">...</span>
+                    </div>
+                </div>
+                <div class="rate-time">Mis à jour: <span id="rateUpdateTime" style="margin-left: 0.25rem; font-weight: 500;">...</span></div>
+            </div>
+
+            <!-- Total in Foreign Currency (Full Width) -->
+            <div class="full-width totals-strip">
+                <div class="total-item">
+                    <span class="total-label">Général (XOF)</span>
+                    <span class="total-value" id="totalXOF">0</span>
+                </div>
+                <div class="total-item gap-border">
+                    <span class="total-label">🇺🇸 Équivalent USD</span>
+                    <span class="total-value" id="totalUSD">$0.00</span>
+                </div>
+                <div class="total-item gap-border">
+                    <span class="total-label">🇪🇺 Équivalent EUR</span>
+                    <span class="total-value" id="totalEUR">€0.00</span>
+                </div>
+                <div class="total-item gap-border">
+                    <span class="total-label">🇳🇬 Équivalent NGN</span>
+                    <span class="total-value" id="totalNGN">₦0.00</span>
+                </div>
+            </div>
+
+            <!-- Chart Card -->
+            <div class="card chart-card full-width">
+                <h3>📈 Dépenses par catégorie</h3>
+                <div class="chart-container">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Recent Expenses Card -->
+            <div class="card full-width">
+                <h3>🕒 Dernières dépenses</h3>
+                <div id="expenseList" class="expense-list"></div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            <p>Projet de Fin d'Études - Farinre Gideon - Département d'Informatique</p>
+            <p>© 2025 Dépenses Bénin. Redesigned with elegance.</p>
+        </footer>
+    </div>
+
+    <script>
+    let currentBudget = 0;
+    let currentMonthSpent = 0;
+    let currentRates = {};
+
+    function logout() {
+        firebase.auth().signOut().then(() => {
+            window.location.href = 'index.html';
+        });
+    }
+
+    firebase.auth().onAuthStateChanged(function(user) {
+        if (!user) {
+            window.location.href = 'index.html';
+        } else {
+            loadBudget(user.uid);
+            loadExpenses(user.uid);
+            loadExchangeRates();
+            setInterval(loadExchangeRates, 300000); // refresh every 5 min
+        }
+    });
+
+    function loadBudget(userId) {
+        firebase.firestore().collection('budgets').doc(userId).get()
+            .then((doc) => {
+                if (doc.exists) {
+                    currentBudget = doc.data().amount;
+                    document.getElementById('budgetAmount').textContent = currentBudget;
+                } else {
+                    document.getElementById('budgetAmount').textContent = 'Non défini';
+                }
+                updateBudgetDisplay();
+            })
+            .catch((error) => console.error("Error loading budget:", error));
+    }
+
+    function loadExchangeRates() {
+        document.getElementById('usdRate').innerHTML = '...';
+        document.getElementById('eurRate').innerHTML = '...';
+        document.getElementById('gbpRate').innerHTML = '...';
+        document.getElementById('ngnRate').innerHTML = '...';
+
+        fetch('https://api.exchangerate-api.com/v4/latest/XOF')
+            .then(response => response.json())
+            .then(data => {
+                currentRates = data.rates;
+                displayExchangeRates();
+            })
+            .catch(error => {
+                console.error('Error loading rates:', error);
+            });
+    }
+
+    function displayExchangeRates() {
+        if (currentRates.USD) document.getElementById('usdRate').innerHTML = `1 USD = ${(1 / currentRates.USD).toFixed(0)} XOF`;
+        if (currentRates.EUR) document.getElementById('eurRate').innerHTML = `1 EUR = ${(1 / currentRates.EUR).toFixed(0)} XOF`;
+        if (currentRates.GBP) document.getElementById('gbpRate').innerHTML = `1 GBP = ${(1 / currentRates.GBP).toFixed(0)} XOF`;
+        if (currentRates.NGN) document.getElementById('ngnRate').innerHTML = `1 NGN = ${(1 / currentRates.NGN).toFixed(0)} XOF`;
+        
+        const now = new Date();
+        document.getElementById('rateUpdateTime').innerHTML = now.toLocaleTimeString();
+    }
+
+    function setBudget() {
+        const user = firebase.auth().currentUser;
+        if (!user) { alert('Vous devez être connecté'); return; }
+
+        const newBudget = Number(document.getElementById('newBudget').value);
+        if (newBudget <= 0) { alert('Veuillez entrer un montant valide'); return; }
+
+        firebase.firestore().collection('budgets').doc(user.uid).set({
+            amount: newBudget,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }).then(() => {
+            currentBudget = newBudget;
+            document.getElementById('budgetAmount').textContent = currentBudget;
+            document.getElementById('newBudget').value = '';
+            updateBudgetDisplay();
+        }).catch((error) => alert('Erreur: ' + error.message));
+    }
+
+    function updateBudgetDisplay() {
+        const progressBar = document.getElementById('budgetProgress');
+        const budgetAlert = document.getElementById('budgetAlert');
+        
+        if (currentBudget > 0) {
+            const percentage = (currentMonthSpent / currentBudget) * 100;
+            progressBar.style.width = Math.min(percentage, 100) + '%';
+            progressBar.classList.remove('warning', 'danger');
+            
+            if (currentMonthSpent > currentBudget) {
+                budgetAlert.className = 'alert alert-danger';
+                budgetAlert.innerHTML = '⚠️ Début de dépassement du budget!';
+                progressBar.classList.add('danger');
+            } else if (currentMonthSpent > currentBudget * 0.8) {
+                budgetAlert.className = 'alert alert-warning';
+                budgetAlert.innerHTML = '⚠️ Plus de 80% du budget utilisé.';
+                progressBar.classList.add('warning');
+            } else {
+                budgetAlert.className = 'alert alert-success';
+                budgetAlert.innerHTML = '✅ Budget sain.';
+            }
+            budgetAlert.style.display = 'flex';
+        } else {
+            progressBar.style.width = '0%';
+            budgetAlert.className = 'alert alert-warning';
+            budgetAlert.innerHTML = '💡 Définissez un budget pour suivre vos dépenses.';
+            budgetAlert.style.display = 'flex';
+        }
+    }
+
+    function calculateMonthlySpent(expenses) {
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
+        
+        let total = 0;
+        expenses.forEach(e => {
+            const expenseDate = new Date(e.date);
+            if (expenseDate.getMonth() === currentMonth && expenseDate.getFullYear() === currentYear) {
+                total += e.amount;
+            }
+        });
+        
+        currentMonthSpent = total;
+        document.getElementById('monthlySpent').textContent = currentMonthSpent;
+        
+        if (currentRates.USD) document.getElementById('totalUSD').textContent = '$' + (total * currentRates.USD).toFixed(2);
+        if (currentRates.EUR) document.getElementById('totalEUR').textContent = '€' + (total * currentRates.EUR).toFixed(2);
+        if (currentRates.NGN) document.getElementById('totalNGN').textContent = '₦' + (total * currentRates.NGN).toFixed(2);
+        document.getElementById('totalXOF').textContent = total;
+        
+        updateBudgetDisplay();
+    }
+
+    function getCategoryEmoji(category) {
+        const map = {
+            'Nourriture': '🍔',
+            'Transport (Zemidjan)': '🏍️',
+            'Communication (Airtime)': '📱',
+            'Énergie (SBEE)': '⚡',
+            'Santé': '💊',
+            'Logement': '🏠',
+            'Éducation': '📚',
+            'Divertissement': '🎮',
+            'Autre': '🏷️'
+        };
+        return map[category] || '🏷️';
+    }
+
+    function loadExpenses(userId) {
+        const expenseListDiv = document.getElementById('expenseList');
+        
+        firebase.firestore().collection('expenses')
+            .where('userId', '==', userId)
+            .orderBy('date', 'desc')
+            .limit(20)
+            .get()
+            .then((querySnapshot) => {
+                if (querySnapshot.empty) {
+                    expenseListDiv.innerHTML = '<div style="text-align:center; padding: 2rem; color: #94A3B8;">Aucune dépense pour le moment.</div>';
+                    return;
+                }
+
+                let html = '';
+                let categoryTotals = {};
+                let expenses = [];
+
+                querySnapshot.forEach((doc) => {
+                    const e = doc.data();
+                    expenses.push(e);
+                   
+                    let conversions = [];
+                    if (currentRates.USD) conversions.push(`$${(e.amount * currentRates.USD).toFixed(2)}`);
+                    if (currentRates.EUR) conversions.push(`€${(e.amount * currentRates.EUR).toFixed(2)}`);
+                    if (currentRates.NGN) conversions.push(`₦${(e.amount * currentRates.NGN).toFixed(2)}`);
+                    
+                    const currenciesStr = conversions.join(' • ');
+                    const emoji = getCategoryEmoji(e.category);
+
+                    html += `
+                    <div class="expense-item">
+                        <div class="expense-icon-wrapper">
+                            ${emoji}
+                        </div>
+                        <div class="expense-details">
+                            <div class="expense-title">${e.description || 'Dépense'}</div>
+                            <div class="expense-meta">
+                                <span>${e.date}</span>
+                                <span class="category-badge">${e.category}</span>
+                            </div>
+                        </div>
+                        <div class="expense-amount-wrapper">
+                            <div class="expense-amount">-${e.amount} XOF</div>
+                            <div class="expense-currencies">${currenciesStr}</div>
+                        </div>
+                    </div>`;
+
+                    if (categoryTotals[e.category]) {
+                        categoryTotals[e.category] += e.amount;
+                    } else {
+                        categoryTotals[e.category] = e.amount;
+                    }
+                });
+                
+                expenseListDiv.innerHTML = html;
+                calculateMonthlySpent(expenses);
+                createCategoryChart(categoryTotals);
+            })
+            .catch((error) => {
+                expenseListDiv.innerHTML = '<div class="alert alert-danger">Erreur de chargement.</div>';
+                console.error(error);
+            });
+    }
+
+    function createCategoryChart(categoryTotals) {
+        const ctx = document.getElementById('categoryChart').getContext('2d');
+        const categories = Object.keys(categoryTotals);
+        const amounts = Object.values(categoryTotals);
+
+        if (categories.length === 0) {
+            document.getElementById('categoryChart').style.display = 'none';
+            return;
+        }
+
+        if (window.myChart) {
+            window.myChart.destroy();
+        }
+
+        window.myChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: categories,
+                datasets: [{
+                    data: amounts,
+                    backgroundColor: [
+                        '#0A5C36', // Deep Green
+                        '#D4AF37', // Gold
+                        '#E63946', // Red
+                        '#2A9D8F', // Teal
+                        '#F4A261', // Orange
+                        '#264653', // Dark Blue
+                        '#E76F51', // Burnt Orange
+                        '#A8DADC'  // Light blue
+                    ],
+                    borderWidth: 0,
+                    hoverOffset: 12
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            font: { family: "'Inter', sans-serif" },
+                            usePointStyle: true,
+                            padding: 20
+                        }
+                    }
+                },
+                layout: {
+                    padding: 20
+                }
+            }
+        });
+    }
+
+    function syncMobileMoney() {
+        const user = firebase.auth().currentUser;
+        if (!user) return;
+
+        const syncStatus = document.getElementById('syncStatus');
+        syncStatus.className = 'alert alert-success';
+        syncStatus.innerHTML = 'ℹ️ Synchronisation en cours...';
+
+        setTimeout(() => {
+            const sampleTransactions = [
+                { date: getRandomDate(30), amount: 5000, description: 'Dantokpa', category: 'Nourriture' },
+                { date: getRandomDate(20), amount: 2000, description: 'Zemidjan', category: 'Transport (Zemidjan)' },
+                { date: getRandomDate(15), amount: 10000, description: 'MTN Data', category: 'Communication (Airtime)' }
+            ];
+
+            const promises = sampleTransactions.map(t => {
+                return firebase.firestore().collection('expenses').add({
+                    userId: user.uid, category: t.category, amount: t.amount, date: t.date,
+                    description: t.description + ' (MoMo)', timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            });
+
+            Promise.all(promises).then(() => {
+                syncStatus.innerHTML = '✅ Synchronisation terminée avec succès !';
+                loadExpenses(user.uid);
+                loadBudget(user.uid);
+                setTimeout(() => { syncStatus.style.display = 'none'; }, 4000);
+            }).catch((error) => {
+                syncStatus.className = 'alert alert-danger';
+                syncStatus.innerHTML = '❌ Erreur de synchro';
+            });
+        }, 1500);
+    }
+
+    function getRandomDate(daysAgo) {
+        const date = new Date();
+        date.setDate(date.getDate() - Math.floor(Math.random() * daysAgo));
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+    </script>
+</body>
+</html>
