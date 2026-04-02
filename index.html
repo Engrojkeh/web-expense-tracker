@@ -24,10 +24,15 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="login-container">
-        <div class="card auth-card">
+    <div class="auth-split-layout">
+        <!-- Beautiful Image Side -->
+        <div class="auth-image-side bg-login"></div>
+        
+        <!-- Form Side -->
+        <div class="auth-form-side">
+            <div class="card auth-card" style="border: none; box-shadow: none; background: transparent;">
             <div class="nav-logo" style="justify-content: center; margin-bottom: 1rem; font-size: 1.5rem;">
-                <span style="font-size: 1.8rem; margin-right: 0.25rem;">💰</span> Dépenses Bénin
+                <img src="logo.jpg" alt="Logo" class="custom-logo" style="height: 40px; margin-right: 0.5rem;"> Dépenses Bénin
             </div>
             <h1>Bienvenue</h1>
             <p class="auth-subtitle" id="authSubtitle">Gérez vos finances avec élégance.</p>
@@ -75,6 +80,7 @@
                 <div class="auth-links" style="margin-top: 0.5rem; text-align: center;">
                     Déjà un compte ? <a href="#" onclick="toggleAuthMode('login')">Se connecter</a>
                 </div>
+            </div>
             </div>
         </div>
     </div>

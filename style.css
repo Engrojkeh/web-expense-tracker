@@ -92,6 +92,88 @@ h3 {
     padding: 2rem;
 }
 
+/* ===== SPLIT SCREEN LAYOUTS ===== */
+.auth-split-layout {
+    display: flex;
+    min-height: 100vh;
+    width: 100vw;
+}
+
+.auth-image-side {
+    flex: 1;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+    display: none; /* hidden on very small screens */
+}
+
+@media (min-width: 768px) {
+    .auth-image-side {
+        display: block;
+    }
+}
+
+.bg-login { background-image: url('hero-login.jpg'); }
+
+.auth-image-side::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(to bottom, rgba(10, 92, 54, 0.4), rgba(0, 0, 0, 0.2));
+}
+
+.auth-form-side {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: var(--bg-color);
+}
+
+/* Add Expense Card Split Layout */
+.card-split-layout {
+    display: flex;
+    background: var(--glass-bg);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-soft);
+    min-height: 600px;
+    margin-top: 1rem;
+    border: 1px solid var(--glass-border);
+}
+
+.card-image-side {
+    flex: 1;
+    background-image: url('hero-add.jpg');
+    background-size: cover;
+    background-position: center;
+    display: none;
+}
+
+@media (min-width: 768px) {
+    .card-image-side {
+        display: block;
+    }
+}
+
+.card-form-side {
+    flex: 1;
+    padding: 2.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.custom-logo {
+    height: 32px;
+    width: auto;
+    object-fit: contain;
+    margin-right: 0.5rem;
+    vertical-align: middle;
+}
+
+
 /* ===== GLASSMORPHISM CARDS ===== */
 .card {
     background: var(--glass-bg);
