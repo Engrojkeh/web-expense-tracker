@@ -114,7 +114,7 @@ h3 {
     }
 }
 
-.bg-login { background-image: url('hero-login.jpg'); }
+.bg-login { background-image: url('hero-login.png'); }
 
 .auth-image-side::after {
     content: '';
