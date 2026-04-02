@@ -95,22 +95,23 @@ h3 {
 /* ===== SPLIT SCREEN LAYOUTS ===== */
 .auth-split-layout {
     display: flex;
+    flex-direction: column;
     min-height: 100vh;
     width: 100vw;
 }
 
 .auth-image-side {
     flex: 1;
+    min-height: 250px; /* Banner size on mobile */
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     position: relative;
-    display: none; /* hidden on very small screens */
 }
 
 @media (min-width: 768px) {
-    .auth-image-side {
-        display: block;
+    .auth-split-layout {
+        flex-direction: row;
     }
 }
 
@@ -135,6 +136,7 @@ h3 {
 /* Add Expense Card Split Layout */
 .card-split-layout {
     display: flex;
+    flex-direction: column;
     background: var(--glass-bg);
     border-radius: var(--radius-lg);
     overflow: hidden;
@@ -146,15 +148,15 @@ h3 {
 
 .card-image-side {
     flex: 1;
+    min-height: 200px; /* Banner size on mobile */
     background-image: url('hero-add.jpg');
     background-size: cover;
     background-position: center;
-    display: none;
 }
 
 @media (min-width: 768px) {
-    .card-image-side {
-        display: block;
+    .card-split-layout {
+        flex-direction: row;
     }
 }
 
