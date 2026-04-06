@@ -289,69 +289,66 @@
     }
 
     function loadExpenses(userId) {
-        const expenseListDiv = document.getElementById('expenseList');
-        
-        firebase.firestore().collection('expenses')
-            .where('userId', '==', userId)
-            .orderBy('date', 'desc')
-            .limit(20)
-            .get()
-            .then((querySnapshot) => {
-                if (querySnapshot.empty) {
-                    expenseListDiv.innerHTML = '<div style="text-align:center; padding: 2rem; color: #94A3B8;">Aucune dépense pour le moment.</div>';
-                    return;
-                }
+    const expenseListDiv = document.getElementById('expenseList');
+    
+    // Using .onSnapshot() for TRUE real-time listening instead of .get()
+    firebase.firestore().collection('expenses')
+        .where('userId', '==', userId)
+        .orderBy('date', 'desc')
+        .limit(20)
+        .onSnapshot((querySnapshot) => {
+            if (querySnapshot.empty) {
+                expenseListDiv.innerHTML = '<div style="text-align:center; padding: 2rem; color: #94A3B8;">Aucune dépense pour le moment.</div>';
+                return;
+            }
 
-                let html = '';
-                let categoryTotals = {};
-                let expenses = [];
+            let html = '';
+            let categoryTotals = {};
+            let expenses = [];
 
-                querySnapshot.forEach((doc) => {
-                    const e = doc.data();
-                    expenses.push(e);
-                   
-                    let conversions = [];
-                    if (currentRates.USD) conversions.push(`$${(e.amount * currentRates.USD).toFixed(2)}`);
-                    if (currentRates.EUR) conversions.push(`€${(e.amount * currentRates.EUR).toFixed(2)}`);
-                    if (currentRates.NGN) conversions.push(`₦${(e.amount * currentRates.NGN).toFixed(2)}`);
-                    
-                    const currenciesStr = conversions.join(' • ');
-                    const emoji = getCategoryEmoji(e.category);
-
-                    html += `
-                    <div class="expense-item">
-                        <div class="expense-icon-wrapper">
-                            ${emoji}
-                        </div>
-                        <div class="expense-details">
-                            <div class="expense-title">${e.description || 'Dépense'}</div>
-                            <div class="expense-meta">
-                                <span>${e.date}</span>
-                                <span class="category-badge">${e.category}</span>
-                            </div>
-                        </div>
-                        <div class="expense-amount-wrapper">
-                            <div class="expense-amount">-${e.amount} XOF</div>
-                            <div class="expense-currencies">${currenciesStr}</div>
-                        </div>
-                    </div>`;
-
-                    if (categoryTotals[e.category]) {
-                        categoryTotals[e.category] += e.amount;
-                    } else {
-                        categoryTotals[e.category] = e.amount;
-                    }
-                });
+            querySnapshot.forEach((doc) => {
+                const e = doc.data();
+                expenses.push(e);
+               
+                let conversions = [];
+                if (currentRates.USD) conversions.push(`$${(e.amount * currentRates.USD).toFixed(2)}`);
+                if (currentRates.EUR) conversions.push(`€${(e.amount * currentRates.EUR).toFixed(2)}`);
+                if (currentRates.NGN) conversions.push(`₦${(e.amount * currentRates.NGN).toFixed(2)}`);
                 
-                expenseListDiv.innerHTML = html;
-                calculateMonthlySpent(expenses);
-                createCategoryChart(categoryTotals);
-            })
-            .catch((error) => {
-                expenseListDiv.innerHTML = '<div class="alert alert-danger">Erreur de chargement.</div>';
-                console.error(error);
+                const currenciesStr = conversions.join(' • ');
+                const emoji = getCategoryEmoji(e.category);
+
+                html += `
+                <div class="expense-item">
+                    <div class="expense-icon-wrapper">${emoji}</div>
+                    <div class="expense-details">
+                        <div class="expense-title">${e.description || 'Dépense'}</div>
+                        <div class="expense-meta">
+                            <span>${e.date}</span>
+                            <span class="category-badge">${e.category}</span>
+                        </div>
+                    </div>
+                    <div class="expense-amount-wrapper">
+                        <div class="expense-amount">-${e.amount} XOF</div>
+                        <div class="expense-currencies">${currenciesStr}</div>
+                    </div>
+                </div>`;
+
+                if (categoryTotals[e.category]) {
+                    categoryTotals[e.category] += e.amount;
+                } else {
+                    categoryTotals[e.category] = e.amount;
+                }
             });
-    }
+            
+            expenseListDiv.innerHTML = html;
+            calculateMonthlySpent(expenses);
+            createCategoryChart(categoryTotals);
+        }, (error) => {
+            expenseListDiv.innerHTML = '<div class="alert alert-danger">Erreur de chargement.</div>';
+            console.error("Real-time listener error:", error);
+        });
+}
 
     function createCategoryChart(categoryTotals) {
         const ctx = document.getElementById('categoryChart').getContext('2d');
