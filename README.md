@@ -55,7 +55,6 @@ We have taken several measures to ensure the integrity and security of the appli
      }
    }
    ```
-   *Similarly, use Google Cloud Console to restrict your Firebase `apiKey` to your specific production domain / localhost ports.*
+   *Similarly, use Google Cloud Console to restrict your Firebase `apiKey` to your specific production domain/localhost ports.*
 
-## 📄 License
-Project de Fin d'Études - Farinre Gideon. All rights reserved.
+
