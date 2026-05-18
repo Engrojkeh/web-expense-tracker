@@ -2,6 +2,9 @@
 
 > A modern web app for tracking daily expenses and managing monthly budgets, tailored for West African users.
 
+## 🔗 Live Demo
+**[engrojkeh.github.io/web-expense-tracker](https://engrojkeh.github.io/web-expense-tracker)**
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](./LICENSE)
 [![Firebase](https://img.shields.io/badge/Backend-Firebase-FFCA28?style=for-the-badge&logo=firebase)](https://firebase.google.com)
 [![JavaScript](https://img.shields.io/badge/JavaScript-Vanilla-F7DF1E?style=for-the-badge&logo=javascript)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
