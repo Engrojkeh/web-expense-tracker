@@ -5,31 +5,23 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://cdn.jsdelivr.net https://api.exchangerate-api.com https://*.googleapis.com wss://*.firebaseio.com https://*.firebaseapp.com; frame-src 'self' https://*.firebaseapp.com; img-src 'self' data:;">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dépenses Bénin | Dashboard</title>
-    <!-- Firebase scripts -->
+
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-    <!-- Chart.js for graphs -->
+    <!-- Firebase Config (centralised — do not duplicate inline) -->
+    <script src="firebase-config.js"></script>
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyBPtGqa0vRx_Rdrenb79N_PdGo1gnw9BF0",
-            authDomain: "web-expense-tracker-787aa.firebaseapp.com",
-            projectId: "web-expense-tracker-787aa",
-            storageBucket: "web-expense-tracker-787aa.firebasestorage.app",
-            messagingSenderId: "824955298078",
-            appId: "1:824955298078:web:7ab36cad229b150bcba90f",
-            measurementId: "G-B8CWER4ECE"
-        };
-        firebase.initializeApp(firebaseConfig);
-    </script>
+
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-logo">
-            <img src="logo.jpg" alt="Logo" class="custom-logo"> Dépenses Bénin
+            <img src="assets/logo.jpg" alt="Dépenses Bénin Logo" class="custom-logo"> Dépenses Bénin
         </div>
         <div class="nav-links">
             <a href="dashboard.html" class="active">Dashboard</a>
@@ -51,7 +43,7 @@
 
         <!-- Dashboard Grid -->
         <div class="dashboard-grid">
-            
+
             <!-- Budget Card -->
             <div class="card budget-card">
                 <h3>💰 Budget Mensuel</h3>
@@ -60,7 +52,6 @@
                         <div class="budget-amount"><span id="budgetAmount">--</span> <span>XOF</span></div>
                         <div class="budget-spent">Dépensé: <strong><span id="monthlySpent">--</span> XOF</strong></div>
                     </div>
-                    
                     <div class="progress-container">
                         <div id="budgetProgress" class="progress-bar" style="width: 0%;"></div>
                     </div>
@@ -96,7 +87,7 @@
                 <div class="rate-time">Mis à jour: <span id="rateUpdateTime" style="margin-left: 0.25rem; font-weight: 500;">...</span></div>
             </div>
 
-            <!-- Total in Foreign Currency (Full Width) -->
+            <!-- Totals Strip -->
             <div class="full-width totals-strip">
                 <div class="total-item">
                     <span class="total-label">Général (XOF)</span>
@@ -156,7 +147,7 @@
             loadBudget(user.uid);
             loadExpenses(user.uid);
             loadExchangeRates();
-            setInterval(loadExchangeRates, 300000); // refresh every 5 min
+            setInterval(loadExchangeRates, 300000);
         }
     });
 
@@ -186,9 +177,7 @@
                 currentRates = data.rates;
                 displayExchangeRates();
             })
-            .catch(error => {
-                console.error('Error loading rates:', error);
-            });
+            .catch(error => console.error('Error loading rates:', error));
     }
 
     function displayExchangeRates() {
@@ -196,9 +185,7 @@
         if (currentRates.EUR) document.getElementById('eurRate').innerHTML = `1 EUR = ${(1 / currentRates.EUR).toFixed(0)} XOF`;
         if (currentRates.GBP) document.getElementById('gbpRate').innerHTML = `1 GBP = ${(1 / currentRates.GBP).toFixed(0)} XOF`;
         if (currentRates.NGN) document.getElementById('ngnRate').innerHTML = `1 NGN = ${(1 / currentRates.NGN).toFixed(0)} XOF`;
-        
-        const now = new Date();
-        document.getElementById('rateUpdateTime').innerHTML = now.toLocaleTimeString();
+        document.getElementById('rateUpdateTime').innerHTML = new Date().toLocaleTimeString();
     }
 
     function setBudget() {
@@ -222,12 +209,12 @@
     function updateBudgetDisplay() {
         const progressBar = document.getElementById('budgetProgress');
         const budgetAlert = document.getElementById('budgetAlert');
-        
+
         if (currentBudget > 0) {
             const percentage = (currentMonthSpent / currentBudget) * 100;
             progressBar.style.width = Math.min(percentage, 100) + '%';
             progressBar.classList.remove('warning', 'danger');
-            
+
             if (currentMonthSpent > currentBudget) {
                 budgetAlert.className = 'alert alert-danger';
                 budgetAlert.innerHTML = '⚠️ Début de dépassement du budget!';
@@ -253,7 +240,7 @@
         const now = new Date();
         const currentMonth = now.getMonth();
         const currentYear = now.getFullYear();
-        
+
         let total = 0;
         expenses.forEach(e => {
             const expenseDate = new Date(e.date);
@@ -261,15 +248,15 @@
                 total += e.amount;
             }
         });
-        
+
         currentMonthSpent = total;
         document.getElementById('monthlySpent').textContent = currentMonthSpent;
-        
+
         if (currentRates.USD) document.getElementById('totalUSD').textContent = '$' + (total * currentRates.USD).toFixed(2);
         if (currentRates.EUR) document.getElementById('totalEUR').textContent = '€' + (total * currentRates.EUR).toFixed(2);
         if (currentRates.NGN) document.getElementById('totalNGN').textContent = '₦' + (total * currentRates.NGN).toFixed(2);
         document.getElementById('totalXOF').textContent = total;
-        
+
         updateBudgetDisplay();
     }
 
@@ -289,66 +276,61 @@
     }
 
     function loadExpenses(userId) {
-    const expenseListDiv = document.getElementById('expenseList');
-    
-    // Using .onSnapshot() for TRUE real-time listening instead of .get()
-    firebase.firestore().collection('expenses')
-        .where('userId', '==', userId)
-        .orderBy('date', 'desc')
-        .limit(20)
-        .onSnapshot((querySnapshot) => {
-            if (querySnapshot.empty) {
-                expenseListDiv.innerHTML = '<div style="text-align:center; padding: 2rem; color: #94A3B8;">Aucune dépense pour le moment.</div>';
-                return;
-            }
+        const expenseListDiv = document.getElementById('expenseList');
 
-            let html = '';
-            let categoryTotals = {};
-            let expenses = [];
-
-            querySnapshot.forEach((doc) => {
-                const e = doc.data();
-                expenses.push(e);
-               
-                let conversions = [];
-                if (currentRates.USD) conversions.push(`$${(e.amount * currentRates.USD).toFixed(2)}`);
-                if (currentRates.EUR) conversions.push(`€${(e.amount * currentRates.EUR).toFixed(2)}`);
-                if (currentRates.NGN) conversions.push(`₦${(e.amount * currentRates.NGN).toFixed(2)}`);
-                
-                const currenciesStr = conversions.join(' • ');
-                const emoji = getCategoryEmoji(e.category);
-
-                html += `
-                <div class="expense-item">
-                    <div class="expense-icon-wrapper">${emoji}</div>
-                    <div class="expense-details">
-                        <div class="expense-title">${e.description || 'Dépense'}</div>
-                        <div class="expense-meta">
-                            <span>${e.date}</span>
-                            <span class="category-badge">${e.category}</span>
-                        </div>
-                    </div>
-                    <div class="expense-amount-wrapper">
-                        <div class="expense-amount">-${e.amount} XOF</div>
-                        <div class="expense-currencies">${currenciesStr}</div>
-                    </div>
-                </div>`;
-
-                if (categoryTotals[e.category]) {
-                    categoryTotals[e.category] += e.amount;
-                } else {
-                    categoryTotals[e.category] = e.amount;
+        firebase.firestore().collection('expenses')
+            .where('userId', '==', userId)
+            .orderBy('date', 'desc')
+            .limit(20)
+            .onSnapshot((querySnapshot) => {
+                if (querySnapshot.empty) {
+                    expenseListDiv.innerHTML = '<div style="text-align:center; padding: 2rem; color: #94A3B8;">Aucune dépense pour le moment.</div>';
+                    return;
                 }
+
+                let html = '';
+                let categoryTotals = {};
+                let expenses = [];
+
+                querySnapshot.forEach((doc) => {
+                    const e = doc.data();
+                    expenses.push(e);
+
+                    let conversions = [];
+                    if (currentRates.USD) conversions.push(`$${(e.amount * currentRates.USD).toFixed(2)}`);
+                    if (currentRates.EUR) conversions.push(`€${(e.amount * currentRates.EUR).toFixed(2)}`);
+                    if (currentRates.NGN) conversions.push(`₦${(e.amount * currentRates.NGN).toFixed(2)}`);
+
+                    const currenciesStr = conversions.join(' • ');
+                    const emoji = getCategoryEmoji(e.category);
+
+                    html += `
+                    <div class="expense-item">
+                        <div class="expense-icon-wrapper">${emoji}</div>
+                        <div class="expense-details">
+                            <div class="expense-title">${e.description || 'Dépense'}</div>
+                            <div class="expense-meta">
+                                <span>${e.date}</span>
+                                <span class="category-badge">${e.category}</span>
+                            </div>
+                        </div>
+                        <div class="expense-amount-wrapper">
+                            <div class="expense-amount">-${e.amount} XOF</div>
+                            <div class="expense-currencies">${currenciesStr}</div>
+                        </div>
+                    </div>`;
+
+                    categoryTotals[e.category] = (categoryTotals[e.category] || 0) + e.amount;
+                });
+
+                expenseListDiv.innerHTML = html;
+                calculateMonthlySpent(expenses);
+                createCategoryChart(categoryTotals);
+            }, (error) => {
+                expenseListDiv.innerHTML = '<div class="alert alert-danger">Erreur de chargement.</div>';
+                console.error("Real-time listener error:", error);
             });
-            
-            expenseListDiv.innerHTML = html;
-            calculateMonthlySpent(expenses);
-            createCategoryChart(categoryTotals);
-        }, (error) => {
-            expenseListDiv.innerHTML = '<div class="alert alert-danger">Erreur de chargement.</div>';
-            console.error("Real-time listener error:", error);
-        });
-}
+    }
 
     function createCategoryChart(categoryTotals) {
         const ctx = document.getElementById('categoryChart').getContext('2d');
@@ -360,9 +342,7 @@
             return;
         }
 
-        if (window.myChart) {
-            window.myChart.destroy();
-        }
+        if (window.myChart) window.myChart.destroy();
 
         window.myChart = new Chart(ctx, {
             type: 'doughnut',
@@ -370,16 +350,7 @@
                 labels: categories,
                 datasets: [{
                     data: amounts,
-                    backgroundColor: [
-                        '#0A5C36', // Deep Green
-                        '#D4AF37', // Gold
-                        '#E63946', // Red
-                        '#2A9D8F', // Teal
-                        '#F4A261', // Orange
-                        '#264653', // Dark Blue
-                        '#E76F51', // Burnt Orange
-                        '#A8DADC'  // Light blue
-                    ],
+                    backgroundColor: ['#0A5C36','#D4AF37','#E63946','#2A9D8F','#F4A261','#264653','#E76F51','#A8DADC'],
                     borderWidth: 0,
                     hoverOffset: 12
                 }]
@@ -391,16 +362,10 @@
                 plugins: {
                     legend: {
                         position: 'right',
-                        labels: {
-                            font: { family: "'Inter', sans-serif" },
-                            usePointStyle: true,
-                            padding: 20
-                        }
+                        labels: { font: { family: "'Inter', sans-serif" }, usePointStyle: true, padding: 20 }
                     }
                 },
-                layout: {
-                    padding: 20
-                }
+                layout: { padding: 20 }
             }
         });
     }
@@ -420,19 +385,18 @@
                 { date: getRandomDate(15), amount: 10000, description: 'MTN Data', category: 'Communication (Airtime)' }
             ];
 
-            const promises = sampleTransactions.map(t => {
-                return firebase.firestore().collection('expenses').add({
-                    userId: user.uid, category: t.category, amount: t.amount, date: t.date,
-                    description: t.description + ' (MoMo)', timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
-            });
+            const promises = sampleTransactions.map(t =>
+                firebase.firestore().collection('expenses').add({
+                    userId: user.uid, category: t.category, amount: t.amount,
+                    date: t.date, description: t.description + ' (MoMo)',
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                })
+            );
 
             Promise.all(promises).then(() => {
                 syncStatus.innerHTML = '✅ Synchronisation terminée avec succès !';
-                loadExpenses(user.uid);
-                loadBudget(user.uid);
                 setTimeout(() => { syncStatus.style.display = 'none'; }, 4000);
-            }).catch((error) => {
+            }).catch(() => {
                 syncStatus.className = 'alert alert-danger';
                 syncStatus.innerHTML = '❌ Erreur de synchro';
             });
@@ -442,10 +406,7 @@
     function getRandomDate(daysAgo) {
         const date = new Date();
         date.setDate(date.getDate() - Math.floor(Math.random() * daysAgo));
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     }
     </script>
 </body>
