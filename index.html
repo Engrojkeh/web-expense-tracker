@@ -5,84 +5,82 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://cdn.jsdelivr.net https://api.exchangerate-api.com https://*.googleapis.com wss://*.firebaseio.com https://*.firebaseapp.com; frame-src 'self' https://*.firebaseapp.com; img-src 'self' data:;">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dépenses Bénin | Connexion</title>
-    <!-- Preload Hero Image to prevent loading flash -->
-    <link rel="preload" as="image" href="hero-login.png">
-    <!-- Firebase scripts -->
+
+    <!-- Preload Hero Image -->
+    <link rel="preload" as="image" href="assets/hero-login.png">
+
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyBPtGqa0vRx_Rdrenb79N_PdGo1gnw9BF0",
-            authDomain: "web-expense-tracker-787aa.firebaseapp.com",
-            projectId: "web-expense-tracker-787aa",
-            storageBucket: "web-expense-tracker-787aa.firebasestorage.app",
-            messagingSenderId: "824955298078",
-            appId: "1:824955298078:web:7ab36cad229b150bcba90f",
-            measurementId: "G-B8CWER4ECE"
-        };
-        firebase.initializeApp(firebaseConfig);
-    </script>
+
+    <!--
+      SECURITY NOTE:
+      Firebase client-side API keys are public by design and cannot be hidden in frontend apps.
+      Security is enforced through:
+        1. Firebase Auth — only authenticated users can read/write data
+        2. Firestore Security Rules — users can only access their own data
+        3. API key domain restriction — set in Google Cloud Console > APIs & Services > Credentials
+      See: https://firebase.google.com/docs/projects/api-keys
+    -->
+    <script src="firebase-config.js"></script>
+
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="auth-split-layout">
-        <!-- Beautiful Image Side -->
+        <!-- Image Side -->
         <div class="auth-image-side bg-login"></div>
-        
+
         <!-- Form Side -->
         <div class="auth-form-side">
             <div class="card auth-card" style="border: none; box-shadow: none; background: transparent;">
-            <div class="nav-logo" style="justify-content: center; margin-bottom: 1rem; font-size: 1.5rem;">
-                <img src="logo.jpg" alt="Logo" class="custom-logo" style="height: 40px; margin-right: 0.5rem;"> Dépenses Bénin
-            </div>
-            <h1>Bienvenue</h1>
-            <p class="auth-subtitle" id="authSubtitle">Gérez vos finances avec élégance.</p>
-            
-            <!-- Login Form -->
-            <div id="loginForm">
-                <div class="form-group">
-                    <label for="loginEmail">Adresse Émail</label>
-                    <input type="email" id="loginEmail" placeholder="nom@exemple.com">
+                <div class="nav-logo" style="justify-content: center; margin-bottom: 1rem; font-size: 1.5rem;">
+                    <img src="assets/logo.jpg" alt="Dépenses Bénin Logo" class="custom-logo" style="height: 40px; margin-right: 0.5rem;">
+                    Dépenses Bénin
                 </div>
-                
-                <div class="form-group" style="margin-bottom: 2rem;">
-                    <label for="loginPassword">Mot de passe</label>
-                    <input type="password" id="loginPassword" placeholder="••••••••">
-                </div>
-                
-                <div class="btn-container" style="margin-bottom: 1rem;">
-                    <button onclick="login()" class="btn w-100">Se connecter</button>
-                </div>
-                <div class="auth-links" style="margin-top: 0.5rem; text-align: center;">
-                    Vous n'avez pas de compte ? <a href="#" onclick="toggleAuthMode('signup')">S'inscrire</a>
-                </div>
-            </div>
+                <h1>Bienvenue</h1>
+                <p class="auth-subtitle" id="authSubtitle">Gérez vos finances avec élégance.</p>
 
-            <!-- Signup Form (Hidden by default) -->
-            <div id="signupForm" style="display: none;">
-                <div class="form-group">
-                    <label for="signupName">Nom Complet</label>
-                    <input type="text" id="signupName" placeholder="Ex: Jean Dupont">
+                <!-- Login Form -->
+                <div id="loginForm">
+                    <div class="form-group">
+                        <label for="loginEmail">Adresse Émail</label>
+                        <input type="email" id="loginEmail" placeholder="nom@exemple.com" autocomplete="email">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 2rem;">
+                        <label for="loginPassword">Mot de passe</label>
+                        <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+                    </div>
+                    <div class="btn-container" style="margin-bottom: 1rem;">
+                        <button onclick="login()" class="btn w-100">Se connecter</button>
+                    </div>
+                    <div class="auth-links" style="margin-top: 0.5rem; text-align: center;">
+                        Vous n'avez pas de compte ? <a href="#" onclick="toggleAuthMode('signup')">S'inscrire</a>
+                    </div>
                 </div>
-                
-                <div class="form-group">
-                    <label for="signupEmail">Adresse Émail</label>
-                    <input type="email" id="signupEmail" placeholder="nom@exemple.com">
+
+                <!-- Signup Form -->
+                <div id="signupForm" style="display: none;">
+                    <div class="form-group">
+                        <label for="signupName">Nom Complet</label>
+                        <input type="text" id="signupName" placeholder="Ex: Jean Dupont" autocomplete="name">
+                    </div>
+                    <div class="form-group">
+                        <label for="signupEmail">Adresse Émail</label>
+                        <input type="email" id="signupEmail" placeholder="nom@exemple.com" autocomplete="email">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 2rem;">
+                        <label for="signupPassword">Mot de passe</label>
+                        <input type="password" id="signupPassword" placeholder="•••••••• (Min 6)" autocomplete="new-password">
+                    </div>
+                    <div class="btn-container" style="margin-bottom: 1rem;">
+                        <button onclick="createAccount()" class="btn w-100">Créer le compte</button>
+                    </div>
+                    <div class="auth-links" style="margin-top: 0.5rem; text-align: center;">
+                        Déjà un compte ? <a href="#" onclick="toggleAuthMode('login')">Se connecter</a>
+                    </div>
                 </div>
-                
-                <div class="form-group" style="margin-bottom: 2rem;">
-                    <label for="signupPassword">Mot de passe</label>
-                    <input type="password" id="signupPassword" placeholder="•••••••• (Min 6)">
-                </div>
-                
-                <div class="btn-container" style="margin-bottom: 1rem;">
-                    <button onclick="createAccount()" class="btn w-100">Créer le compte</button>
-                </div>
-                <div class="auth-links" style="margin-top: 0.5rem; text-align: center;">
-                    Déjà un compte ? <a href="#" onclick="toggleAuthMode('login')">Se connecter</a>
-                </div>
-            </div>
             </div>
         </div>
     </div>
