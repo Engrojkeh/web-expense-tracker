@@ -115,7 +115,7 @@ h3 {
     }
 }
 
-.bg-login { background-image: url('hero-login.png'); }
+.bg-login { background-image: url('assets/hero-login.png'); }
 
 .auth-image-side::after {
     content: '';
@@ -149,7 +149,7 @@ h3 {
 .card-image-side {
     flex: 1;
     min-height: 200px; /* Banner size on mobile */
-    background-image: url('hero-add.jpg');
+    background-image: url('assets/hero-add.jpg');
     background-size: cover;
     background-position: center;
 }
